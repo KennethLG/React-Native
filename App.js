@@ -6,9 +6,11 @@ import {
   Image,
   TouchableOpacity,
   Alert,
+  Platform,
 } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import * as Sharing from 'expo-sharing';
+import uploadToAnonymousFilesAsync from 'anonymous-files';
 
 import Img from './assets/snack-icon.png';
 
@@ -26,12 +28,17 @@ const App = () => {
       return;
     }
 
-    setSelectedImage({ localUri: image.uri });
-  };
+    if (Platform.OS === "web") {
+      const remoteUri = await uploadToAnonymousFilesAsync(image.uri);
+      setSelectedImage({ localUri: image.uri, remoteUri});
+    } else {
+      setSelectedImage({ localUri: image.uri });
+    }
+  }
 
   const openShareDialog = async () => {
     if (!(await Sharing.isAvailableAsync())) {
-      alert('Sharing is no availbe on your platform');
+      alert(`The image is avaible for sharing at ${selectedImage.remoteUri}`);
       return;
     }
 
